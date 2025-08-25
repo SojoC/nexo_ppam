@@ -1,0 +1,13 @@
+﻿sep=;
+section;field;count
+counts_by_circuito;Monagas 1;4
+counts_by_circuito;Monagas 2;2
+
+section;field;count
+counts_by_congregacion;Central;2
+counts_by_congregacion;El Parque;2
+counts_by_congregacion;Lo Cortijo;2
+
+section;term;searches;total_hits;last_seen
+top_search_terms;0413-370-5540;1;2;2025-08-25T16:23:00.655090+00:00
+top_search_terms;0413;1;2;2025-08-25T16:23:02.028764+00:00

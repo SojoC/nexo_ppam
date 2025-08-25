@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+SQLAlchemy>=2.0
+alembic
+psycopg2-binary
+redis
+python-dotenv
+firebase-admin
+rapidfuzz
+Unidecode
+Metaphone
+pydantic>=2
+pydantic-settings
