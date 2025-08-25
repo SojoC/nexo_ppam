@@ -1,0 +1,54 @@
+# Entornos y archivos de Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.env
+.env
+.env.*
+
+# Entornos virtuales
+venv/
+.venv/
+
+# Archivos de configuración de VSCode
+.vscode/
+
+# Archivos de base de datos y credenciales
+*.sqlite3
+*.db
+creds/
+keys/
+
+# Archivos de log
+*.log
+
+# Node y frontend
+frontend/node_modules/
+frontend/dist/
+
+# Alembic
+backend/alembic/versions/*.pyc
+backend/alembic/__pycache__/
+
+# Otros
+*.zip
+*.tar.gz
+*.bak
+.DS_Store
+Thumbs.db
+
+# Firebase
+firebase.json
+firebase.txt
+
+# CSV y datos temporales
+*.csv
+*.tmp
+
+# Compilados
+*.exe
+*.dll
+*.so
+*.dylib
