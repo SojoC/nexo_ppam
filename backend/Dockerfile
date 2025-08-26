@@ -9,6 +9,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+
+# Copiar alembic.ini y la carpeta alembic
+COPY alembic.ini /app/alembic.ini
+COPY alembic /app/alembic
 COPY app /app/app
 
 ENV PYTHONPATH=/app

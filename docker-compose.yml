@@ -18,7 +18,8 @@ services:
 
   api:
     build: ./backend
-    env_file: .env
+    env_file:
+      - ./backend/.env
     depends_on:
       - db
     ports:
