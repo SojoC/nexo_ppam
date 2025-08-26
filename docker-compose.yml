@@ -29,10 +29,15 @@ services:
     build: ./frontend
     environment:
       - VITE_API_URL=${VITE_API_URL:-http://localhost:8000}
+      - VITE_API_PREFIX=${VITE_API_PREFIX:-/api/v1}
     depends_on:
       - api
     ports:
       - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - node_modules:/app/node_modules
 
 volumes:
   db-data:
+  node_modules:

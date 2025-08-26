@@ -1,8 +1,8 @@
-FROM node:20-alpine
+FROM node:20-slim
 
 WORKDIR /app
 COPY package.json package-lock.json* /app/
-RUN npm ci --no-audit --no-fund
+RUN rm -rf node_modules package-lock.json && npm ci --no-audit --no-fund
 
 COPY . /app
 EXPOSE 5173
