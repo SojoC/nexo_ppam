@@ -52,7 +52,9 @@ function Login({ onLogin }: Props) {
             <div className="control">
               <label htmlFor="pass">Contraseña</label>
               <input id="pass" name="password" type={show ? 'text' : 'password'} placeholder="••••••••" autoComplete="current-password" required value={password} onChange={e => setPassword(e.target.value)} />
-              <button type="button" className="toggle" aria-label="Mostrar u ocultar contraseña" onClick={() => setShow(s => !s)}>{show ? '🙈' : '👁️'}</button>
+              <button type="button" className="toggle" aria-label="Mostrar u ocultar contraseña" onClick={() => setShow(s => !s)}>
+                {show ? '🙈' : '👁️'}
+              </button>
             </div>
             <div className="row">
               <button className="btn" type="submit" disabled={loading}>
