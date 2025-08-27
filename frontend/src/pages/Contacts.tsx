@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getContacts, getMessages, sendMessage } from '../api';
+import { useAuth } from '../auth';
 
 interface Contact {
   id: number;
@@ -13,29 +14,29 @@ interface Message {
   timestamp: string;
 }
 
-interface Props {
-  token: string;
-}
-
-function Contacts({ token }: Props) {
+function Contacts() {
+  const { token } = useAuth();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [selected, setSelected] = useState<Contact | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState('');
 
+
   useEffect(() => {
-    getContacts(token).then(setContacts);
+    if (token) {
+      getContacts(token).then(setContacts);
+    }
   }, [token]);
 
   useEffect(() => {
-    if (selected) {
+    if (selected && token) {
       getMessages(token, selected.id).then(setMessages);
     }
   }, [selected, token]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selected || !text) return;
+    if (!selected || !text || !token) return;
     await sendMessage(token, selected.id, text);
     setText('');
     const msgs = await getMessages(token, selected.id);

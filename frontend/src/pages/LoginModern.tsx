@@ -1,12 +1,11 @@
 
+import '../login-modern.css';
 import React, { useState } from 'react';
 import { login as apiLogin } from '../api';
+import { useAuth } from '../auth';
 
-interface Props {
-  onLogin: (token: string) => void;
-}
-
-function Login({ onLogin }: Props) {
+function Login() {
+  const { login } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -18,8 +17,8 @@ function Login({ onLogin }: Props) {
     setError('');
     setLoading(true);
     try {
-  const data = await apiLogin(username, password);
-      onLogin(data.access_token);
+      const data = await apiLogin(username, password);
+  login(data.access_token);
     } catch (err: any) {
       setError(err.message || 'Error en inicio de sesión');
     } finally {
@@ -32,7 +31,7 @@ function Login({ onLogin }: Props) {
       <header className="login-header">
         <div className="brand">
           <div className="logo">NP</div>
-          <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google logo" style={{height:32, marginLeft:12}} />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google logo" style={{ height: 32, marginLeft: 12 }} />
           <div>
             <div className="title">Nexo PPAM</div>
             <div className="subtitle">Panel de acceso</div>

@@ -1,0 +1,54 @@
+Diagnóstico detallado de error de login (27/08/2025)
+
+Síntomas:
+- La UI de login ya carga con estilos modernos.
+- Al intentar entrar con admin/admin, el login falla con error 422 (Unprocessable Entity).
+- El mensaje de error del backend es:
+  "Input should be a valid dictionary or object to extract fields from", "input":"username=admin&password=admin".
+
+Causas probables:
+1. El endpoint de login de FastAPI espera un JSON, pero el frontend está enviando los datos como x-www-form-urlencoded.
+2. El backend podría estar usando un modelo Pydantic con body=json() en vez de OAuth2PasswordRequestForm.
+3. El frontend está correctamente enviando el body como x-www-form-urlencoded (revisado en src/api.ts).
+
+Verificación:
+- El código frontend en src/api.ts usa:
+  fetch(`${BASE}/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ username, password })
+  })
+- El error 422 indica que el backend espera un JSON, no un form.
+
+Solución recomendada:
+- Revisar el backend (FastAPI):
+  - Si usas OAuth2PasswordRequestForm en el endpoint de login, el frontend está bien.
+  - Si usas un modelo Pydantic con body=json(), debes cambiarlo a OAuth2PasswordRequestForm o ajustar el frontend para enviar JSON.
+- Alternativamente, cambia el endpoint de login para aceptar x-www-form-urlencoded:
+
+from fastapi import APIRouter, Depends, Form
+
+@router.post('/login')
+def login(username: str = Form(...), password: str = Form(...)):
+    ...
+
+- O si usas OAuth2PasswordRequestForm:
+from fastapi.security import OAuth2PasswordRequestForm
+
+@router.post('/login')
+def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    ...
+
+- Si quieres aceptar JSON, cambia el frontend para enviar JSON y pon 'Content-Type': 'application/json'.
+
+Resumen:
+- El frontend ya está correcto para FastAPI + OAuth2PasswordRequestForm.
+- El backend debe aceptar x-www-form-urlencoded, no JSON.
+- El error 422 confirma que el backend espera JSON.
+
+Acción recomendada:
+- Ajustar el backend para aceptar x-www-form-urlencoded en /login.
+
+---
+
+Adjunta este diagnóstico a tu repo para que otros (incluyendo ChatGPT) puedan ver el contexto y la causa raíz.
