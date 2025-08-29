@@ -24,6 +24,7 @@ services:
       - db
     ports:
       - "8000:8000"
+    # NOTA: No se monta ./backend/alembic como volumen para evitar sobrescribir plantillas internas de Alembic
 
   web:
     build: ./frontend

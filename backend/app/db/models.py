@@ -15,4 +15,4 @@ class Contact(Base):
     congregacion: Mapped[str | None] = mapped_column(String)
     territorio: Mapped[str | None] = mapped_column(String)
     privilegios: Mapped[str | None] = mapped_column(String)
-    extra_metadata: Mapped[dict | None] = mapped_column("metadata", JSONB, nullable=True)
+    extra_data: Mapped[dict | None] = mapped_column(JSONB, nullable=True)

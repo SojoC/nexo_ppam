@@ -1,0 +1,47 @@
+# Diagnóstico Login - 27-08-2025
+
+## Resumen del Problema
+El sistema presenta fallos persistentes en el flujo de login, a pesar de que la autenticación funciona correctamente vía PowerShell/curl y el backend responde correctamente a solicitudes formateadas como `application/x-www-form-urlencoded`. Sin embargo, el frontend sigue mostrando errores 404 o 422 y no refleja cambios recientes, lo que indica posibles problemas de sincronización de código, configuración de Docker, o desalineación entre el frontend, backend y la base de datos.
+
+## Diagnóstico Detallado
+1. **Backend**
+   - Framework: FastAPI
+   - Endpoint `/api/v1/login` implementado con `OAuth2PasswordRequestForm`.
+   - Espera datos en formato `application/x-www-form-urlencoded`.
+   - Validado exitosamente con curl/PowerShell.
+   - Base de datos alineada: tabla `users` con columnas `username` y `password_hash` (bcrypt).
+   - Usuario admin creado y verificado.
+
+2. **Frontend**
+   - Framework: Vite + React + TypeScript
+   - Login UI moderno, usa Context API para Auth.
+   - Envía login como `application/x-www-form-urlencoded` usando `URLSearchParams`.
+   - API prefix unificado (`/api/v1`).
+   - Problemas: Cambios en el código no se reflejan en el contenedor Docker, errores 404/422 persistentes.
+
+3. **Docker**
+   - Volúmenes: Se corrigió el montaje de `./frontend:/app` para reflejar cambios locales.
+   - Dockerfile: Usando `node:20-slim` para frontend, `python:3.11-slim` para backend.
+   - Se reiniciaron contenedores tras cambios en volúmenes y dependencias.
+
+4. **Base de Datos**
+   - Alembic como único gestor de migraciones.
+   - Esquema actualizado y migrado.
+   - Usuario admin insertado manualmente y validado.
+
+## Sugerencias y Próximos Pasos
+- Verificar que el contenedor frontend realmente monta el código local (`docker-compose.yml` y `docker ps` para inspeccionar volúmenes).
+- Asegurarse de que el endpoint `/api/v1/login` esté correctamente montado y no haya rutas duplicadas o conflictos de prefijo.
+- Limpiar caché de Vite y reiniciar el contenedor frontend.
+- Validar que el frontend apunte a la URL correcta (`/api/v1/login`) y que no haya hardcodeos o variables de entorno desactualizadas.
+- Revisar logs de frontend y backend para errores detallados.
+- Probar login desde el frontend en modo desarrollo (`npm run dev` fuera de Docker) para descartar problemas de hot-reload o volúmenes.
+- Considerar herramientas como [Tilt](https://tilt.dev/) o [Skaffold](https://skaffold.dev/) para desarrollo con Docker y hot-reload eficiente.
+- Si el problema persiste, migrar a un stack de autenticación más robusto (ej: Auth0, Clerk, Firebase Auth) o usar NextAuth.js si se migra a Next.js.
+
+## Prompt para ChatGPT/Futuro Desarrollador
+> "El sistema presenta errores de login persistentes en el frontend, aunque el backend responde correctamente a solicitudes formateadas como `application/x-www-form-urlencoded` y la base de datos está alineada. El frontend usa Context API y login moderno, pero los cambios no se reflejan en Docker y persisten errores 404/422. ¿Qué pasos de diagnóstico y solución recomendarías para asegurar la sincronización de código, la correcta configuración de rutas y la autenticación end-to-end en un entorno Dockerizado con FastAPI, Vite/React y Postgres? Sugiere también tecnologías modernas para mejorar el flujo de desarrollo y autenticación."
+
+---
+
+**Actualizado por GitHub Copilot, 27-08-2025**

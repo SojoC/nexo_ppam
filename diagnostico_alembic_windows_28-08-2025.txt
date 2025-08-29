@@ -1,0 +1,24 @@
+Diagnóstico y solución de problemas con Alembic y migraciones en entorno Windows
+Fecha: 28/08/2025
+
+Resumen de acciones realizadas:
+--------------------------------------------------
+1. Se detectó que la estructura de Alembic no estaba correctamente inicializada en la carpeta del backend del proyecto.
+2. Se inicializó Alembic en la ruta correcta: backend/alembic.
+3. Se configuró el archivo env.py para importar correctamente Base y habilitar autogeneración de migraciones.
+4. Se creó un script PowerShell (scripts/alembic_win.ps1) para automatizar la ejecución de Alembic con el PYTHONPATH correcto en Windows.
+5. Se agregaron instrucciones claras al README para ejecutar migraciones en Windows.
+6. Se corrigió la cadena de conexión en alembic.ini para usar 'localhost' en vez de 'db', permitiendo conexión local desde Windows.
+7. Se detectó y explicó el error de migraciones antiguas ('Can't locate revision identified by 0001_init') y se sugirió limpiar la carpeta alembic/versions y la tabla alembic_version en la base de datos.
+
+Sugerencias y pasos recomendados:
+--------------------------------------------------
+- Si ves errores de migraciones antiguas, borra todos los archivos de backend/alembic/versions/ y limpia la tabla alembic_version en la base de datos (puedes usar un cliente SQL o pgAdmin).
+- Siempre asegúrate de que la cadena sqlalchemy.url en alembic.ini apunte a localhost cuando ejecutes Alembic desde Windows.
+- Usa el script PowerShell para ejecutar comandos Alembic, por ejemplo:
+  ./scripts/alembic_win.ps1 revision --autogenerate -m "init"
+  ./scripts/alembic_win.ps1 upgrade head
+- Si cambias la estructura de modelos, repite el proceso de autogenerar y aplicar migraciones.
+- Si usas Docker, recuerda que el host de la base de datos dentro del contenedor es 'db', pero fuera (en Windows) es 'localhost'.
+
+Con esto, tu entorno de migraciones Alembic debería funcionar correctamente en Windows y Docker.

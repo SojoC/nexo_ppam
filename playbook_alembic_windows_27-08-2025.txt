@@ -1,0 +1,101 @@
+# Playbook PowerShell: Reconstrucción y Sincronización de Alembic en Docker (Windows)
+
+## Objetivo
+Resolver el conflicto de volúmenes que impide a Alembic generar migraciones correctamente, restaurar la estructura interna de Alembic en el contenedor y sincronizarla con el host para un flujo de trabajo limpio y versionable.
+
+## Pasos Ejecutables
+
+### 0) Parar servicios y respaldar Alembic local
+```
+docker compose down
+
+if (Test-Path .\backend\alembic) {
+  Rename-Item -Path .\backend\alembic -NewName alembic_local_bak_$(Get-Date -Format "yyyyMMdd_HHmmss")
+}
+```
+
+### 1) Verificar que NO montas alembic/ en docker-compose
+- Abre `docker-compose.yml` y elimina o comenta cualquier volumen tipo:
+  ```
+  # - ./backend/alembic:/app/alembic
+  ```
+- Guarda el archivo.
+
+### 2) Levantar contenedores limpios
+```
+docker compose up -d --build
+```
+
+### 3) Regenerar estructura Alembic en el contenedor
+```
+docker compose exec api sh -lc "pwd && ls -la"
+docker compose exec api sh -lc "if [ -d /app/alembic ]; then mv /app/alembic /app/alembic_bak_$(date +%Y%m%d_%H%M%S); fi"
+docker compose exec api alembic init alembic
+docker compose exec api sh -lc "ls -la /app/alembic | sed -n '1,100p'"
+```
+
+### 4) Configurar la URL de BD para Alembic
+```
+docker compose exec api sh -lc `
+"python - << 'PY'
+import re, pathlib
+p = pathlib.Path('/app/alembic.ini')
+t = p.read_text()
+t = re.sub(r'^\s*sqlalchemy\.url\s*=.*$', 'sqlalchemy.url = postgresql+psycopg2://ppam:ppam@db:5432/ppam_db', t, flags=re.M)
+p.write_text(t)
+print('alembic.ini actualizado')
+PY"
+```
+
+### 5) Ajustar env.py para importar Base y target_metadata
+```
+docker compose exec api sh -lc `
+"python - << 'PY'
+from pathlib import Path
+p = Path('/app/alembic/env.py')
+s = p.read_text()
+if 'from app.db.models import Base' not in s:
+    s = s.replace('from alembic import context', 'from alembic import context\nfrom app.db.models import Base')
+import re
+s = re.sub(r'^\s*target_metadata\s*=.*$', 'target_metadata = Base.metadata', s, flags=re.M)
+p.write_text(s)
+print('env.py actualizado (import Base + target_metadata)')
+PY"
+```
+
+### 6) Autogenerar y aplicar migración
+```
+docker compose exec api alembic revision --autogenerate -m "init"
+docker compose exec api sh -lc "ls -la /app/alembic/versions | sed -n '1,200p'"
+docker compose exec api alembic upgrade head
+```
+
+### 7) Sincronizar Alembic del contenedor al host
+```
+New-Item -ItemType Directory -Force -Path .\backend\alembic_sync | Out-Null
+$ApiId = (docker compose ps -q api)
+docker cp "$ApiId:/app/alembic" ".\backend\alembic_sync\alembic"
+if (Test-Path .\backend\alembic) { Remove-Item -Recurse -Force .\backend\alembic }
+Move-Item .\backend\alembic_sync\alembic .\backend\alembic
+Remove-Item -Recurse -Force .\backend\alembic_sync
+```
+
+### 8) Versionar en Git (opcional)
+```
+git add backend/alembic
+git commit -m "chore(alembic): reinit + versiones correctas"
+```
+
+### 9) Probar ciclo completo
+```
+# Haz un cambio mínimo en un modelo y prueba:
+docker compose exec api alembic revision --autogenerate -m "test change"
+docker compose exec api alembic upgrade head
+docker compose logs --tail=100 api
+```
+
+---
+
+**Este playbook soluciona el conflicto de volúmenes y deja tu entorno Alembic listo para desarrollo y versionado.**
+
+**Actualizado por GitHub Copilot, 27-08-2025**

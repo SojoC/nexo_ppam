@@ -1,0 +1,41 @@
+# Diagnóstico y Resolución de Error Alembic - 27-08-2025
+
+## Problema Detectado
+Al intentar generar una migración Alembic en el contenedor backend (`api`), aparece el error:
+
+```
+FileNotFoundError: [Errno 2] No such file or directory: 'alembic/script.py.mako'
+```
+
+Esto ocurre incluso después de reinstalar Alembic y reiniciar el contenedor. El error indica que el archivo de plantilla interno de Alembic (`script.py.mako`) no está disponible en el contenedor.
+
+## Acciones Realizadas
+1. **Reinstalación de Alembic:**
+   - Se reinstaló Alembic dentro del contenedor backend para restaurar archivos de plantilla.
+2. **Reinicio de contenedores:**
+   - Se detuvieron y levantaron nuevamente todos los servicios Docker para limpiar el entorno.
+3. **Verificación de Volúmenes:**
+   - Se revisó el `docker-compose.yml` para asegurar que no se monte la carpeta local `alembic/` sobre la interna del contenedor.
+4. **Intentos de migración:**
+   - Se intentó generar la migración repetidas veces, pero el error persiste.
+
+## Diagnóstico
+El error persiste porque la carpeta local `backend/alembic/` está montando sobre la interna del contenedor, sobrescribiendo los archivos de plantilla de Alembic. Por lo tanto, el contenedor no puede acceder a `script.py.mako` y otros archivos internos necesarios para generar migraciones.
+
+## Solución Propuesta
+1. **Renombrar la carpeta local Alembic:**
+   - Renombrar temporalmente `backend/alembic` a `backend/alembic_local_bak` para que el contenedor use su propia estructura interna.
+2. **Levantar el contenedor backend sin el volumen de Alembic:**
+   - Ejecutar `docker compose up -d` para que el contenedor use los archivos de plantilla originales.
+3. **Generar la migración Alembic dentro del contenedor:**
+   - Ejecutar el comando de migración normalmente.
+4. **Copiar la migración generada a la máquina local:**
+   - Una vez generada, copiar el archivo de migración desde el contenedor a la carpeta local y restaurar la estructura original.
+
+## Resumen
+- El problema es causado por un conflicto de volúmenes que sobrescribe archivos internos de Alembic.
+- La solución es temporalmente quitar/renombrar la carpeta local Alembic, generar la migración, y luego restaurar la estructura local.
+
+---
+
+**Actualizado por GitHub Copilot, 27-08-2025**

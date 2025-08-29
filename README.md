@@ -1,3 +1,27 @@
+## Migraciones Alembic en Windows
+
+Para crear y aplicar migraciones de base de datos con Alembic en Windows, usa el script automatizado:
+
+1. Abre PowerShell y navega a la carpeta backend:
+	```powershell
+	cd backend
+	```
+
+2. Para crear una nueva migración automática:
+	```powershell
+	./scripts/alembic_win.ps1 -AlembicArgs revision --autogenerate -m "mensaje"
+	```
+	Ejemplo:
+	```powershell
+	./scripts/alembic_win.ps1 -AlembicArgs revision --autogenerate -m "init"
+	```
+
+3. Para aplicar las migraciones:
+	```powershell
+	./scripts/alembic_win.ps1 -AlembicArgs upgrade head
+	```
+
+> Nota: No uses comillas simples ni dobles alrededor de toda la cadena de argumentos, solo en el mensaje si es necesario. Si tienes problemas con rutas o imports, asegúrate de estar en la carpeta backend y que el script tenga permisos de ejecución.
 # Nexo_PPAM Fullstack (FastAPI + React + Docker)
 
 ## Levantar
